@@ -10,6 +10,8 @@ Spielkonsole aus den 90ern verhält: Spiele stecken als „Cartridge“ auf eine
 starten beim Einschalten sofort. Hier läuft Kazeta selbst vom Stick, und GCompris liegt als
 Cartridge auf einer zweiten Partition desselben Sticks.
 
+**→ [In 3 Schritten zum eigenen Lernstick](#so-kommt-das-system-auf-deinen-stick)**
+
 ![GCompris-Hauptmenü](screenshots/gcompris-hauptmenue.png)
 
 ## Wofür ist das gut?
@@ -40,42 +42,85 @@ Cartridge auf einer zweiten Partition desselben Sticks.
 
 GCompris startet mit `--fullscreen` und deutscher Sprache (siehe [`cart/cart.kzi`](cart/cart.kzi)).
 
-## Stick erstellen
+## So kommt das System auf deinen Stick
 
-Das fertige Image ist 29 GiB groß und passt auf jeden **USB-Stick ab 32 GB**. Ein USB-3-Stick
-wird empfohlen, weil Kazeta direkt davon läuft. Wegen der Dateigrößen-Grenze von GitHub liegt
-das Image gepackt (zstd) und in Teilen bei den
-[Releases](https://github.com/jjochum-code/kazeta-gcompris/releases).
+Du brauchst nur einen **USB-Stick mit mindestens 32 GB** und das kostenlose Programm
+**balenaEtcher**. Alles, was auf dem Stick ist, wird dabei gelöscht.
 
-> **Achtung:** Beim Schreiben wird der gesamte Stick gelöscht. Prüfe das Zielgerät
-> (`lsblk`) genau, ein falscher Buchstabe überschreibt sonst deine Festplatte.
+### Schritt 1: Herunterladen
 
-### Linux
+Öffne die Seite [**Download (Release v1.0)**](https://github.com/jjochum-code/kazeta-gcompris/releases/latest)
+und lade unten bei „Assets“ diese Dateien in denselben Ordner herunter:
+
+- `kazeta-gcompris.img.xz.part-00`
+- `kazeta-gcompris.img.xz.part-01`
+- `kazeta-gcompris.img.xz.part-02`
+- unter Windows zusätzlich `zusammenfuegen-windows.bat`
+
+Das Image ist in drei Teile gestückelt, weil GitHub keine Dateien über 2 GB erlaubt.
+
+### Schritt 2: Die Teile zu einer Datei zusammenfügen
+
+- **Windows:** Doppelklick auf `zusammenfuegen-windows.bat`. Falls Windows warnt
+  („Der Computer wurde durch Windows geschützt“), auf „Weitere Informationen“ und dann auf
+  „Trotzdem ausführen“ klicken.
+- **Mac oder Linux:** Das Programm „Terminal“ öffnen und eingeben:
+  ```
+  cd ~/Downloads
+  cat kazeta-gcompris.img.xz.part-* > kazeta-gcompris.img.xz
+  ```
+
+Danach liegt im Ordner die Datei **`kazeta-gcompris.img.xz`** (etwa 4,6 GB). Die Teile
+kannst du anschließend löschen.
+
+### Schritt 3: Mit balenaEtcher auf den Stick schreiben
+
+1. [balenaEtcher](https://etcher.balena.io) herunterladen, installieren und starten.
+2. **„Flash from file“** klicken und `kazeta-gcompris.img.xz` auswählen. Entpacken ist
+   nicht nötig, das erledigt Etcher selbst.
+3. **„Select target“** klicken und den USB-Stick auswählen. Achte genau auf Name und Größe,
+   damit du nicht versehentlich eine andere Festplatte erwischst.
+4. **„Flash!“** klicken und warten (je nach Stick 10 bis 30 Minuten). Etcher prüft am Ende
+   selbst, ob alles korrekt geschrieben wurde.
+
+Fertig! Den Stick abziehen und weiter bei [Benutzung](#benutzung).
+
+> **SD-Karte statt USB-Stick?** Auf eine SD-Karte lässt sich das Image genauso schreiben.
+> Viele PCs können aber nicht von einer SD-Karte **starten**. Im Zweifel ist ein USB-Stick
+> die sichere Wahl. Ein USB-3-Stick ist spürbar schneller, weil das ganze System davon läuft.
+
+<details>
+<summary>Für Fortgeschrittene: direkt mit <code>dd</code> unter Linux</summary>
 
 ```bash
-# alle Teile und SHA256SUMS aus dem Release herunterladen, dann:
-sha256sum -c SHA256SUMS
-cat kazeta-gcompris.img.zst.part-* | zstd -d | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+sha256sum -c SHA256SUMS --ignore-missing
+cat kazeta-gcompris.img.xz.part-* | xz -dc | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
 ```
 
-### Windows / macOS
-
-1. Die Teile zu einer Datei zusammenfügen:
-   Windows `copy /b kazeta-gcompris.img.zst.part-00 + kazeta-gcompris.img.zst.part-01 + kazeta-gcompris.img.zst.part-02 kazeta-gcompris.img.zst`,
-   macOS `cat kazeta-gcompris.img.zst.part-* > kazeta-gcompris.img.zst`.
-2. Mit [zstd](https://github.com/facebook/zstd/releases) entpacken: `zstd -d kazeta-gcompris.img.zst`
-   (unter macOS z. B. per `brew install zstd`).
-3. Die entstandene `kazeta-gcompris.img` mit [balenaEtcher](https://etcher.balena.io) auf den Stick schreiben.
-
-Beim ersten Start mit einem größeren Stick bleibt der Platz hinter dem Image einfach ungenutzt.
+`/dev/sdX` ist der Stick, vorher mit `lsblk` genau prüfen.
+</details>
 
 ## Benutzung
 
-1. Stick an einen ausgeschalteten PC stecken.
-2. Einschalten und im Bootmenü den USB-Stick wählen. Je nach Hersteller ist das meist
-   F12, F11, F9, F8 oder Esc.
+1. Stick an einen **ausgeschalteten** PC stecken.
+2. Einschalten und sofort mehrmals die Taste für das **Bootmenü** drücken, dann den
+   USB-Stick auswählen:
+
+   | Hersteller | Taste |
+   |---|---|
+   | Lenovo, Dell, Acer, Fujitsu, Toshiba | F12 |
+   | HP | F9 (oder Esc, dann F9) |
+   | Asus | F8 oder Esc |
+   | MSI, Gigabyte | F11 / F12 |
+   | Medion | F10 |
+
 3. GCompris startet automatisch im Vollbild.
-4. Beendet man GCompris, fährt der Rechner herunter.
+4. Beendet man GCompris, fährt der Rechner herunter. Stick abziehen, und der PC startet
+   beim nächsten Mal wieder ganz normal.
+
+**Der PC startet trotzdem Windows oder meldet einen Fehler?** Dann muss im BIOS/UEFI
+(meist F2 oder Entf direkt nach dem Einschalten) **Secure Boot ausgeschaltet** werden.
+Das ändert nichts an Windows und lässt sich jederzeit wieder einschalten.
 
 Spielstände und Einstellungen speichert Kazeta auf dem Stick (Partition `frzr_root`, unter
 `/var/kazeta/saves`). Jeder Stick merkt sich also den Fortschritt seines Kindes.
