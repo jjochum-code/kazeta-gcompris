@@ -61,8 +61,7 @@ cat kazeta-gcompris.img.zst.part-* | zstd -d | sudo dd of=/dev/sdX bs=4M conv=fs
 ### Windows / macOS
 
 1. Die Teile zu einer Datei zusammenfügen:
-   Windows `copy /b kazeta-gcompris.img.zst.part-00 + kazeta-gcompris.img.zst.part-01 kazeta-gcompris.img.zst`
-   (bei mehr Teilen entsprechend `+ …part-02` usw.),
+   Windows `copy /b kazeta-gcompris.img.zst.part-00 + kazeta-gcompris.img.zst.part-01 + kazeta-gcompris.img.zst.part-02 kazeta-gcompris.img.zst`,
    macOS `cat kazeta-gcompris.img.zst.part-* > kazeta-gcompris.img.zst`.
 2. Mit [zstd](https://github.com/facebook/zstd/releases) entpacken: `zstd -d kazeta-gcompris.img.zst`
    (unter macOS z. B. per `brew install zstd`).
