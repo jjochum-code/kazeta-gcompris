@@ -1,0 +1,5 @@
+Name=GCompris
+Id=gcompris
+Exec=cd content/bin && LANG=de_DE.UTF-8 LANGUAGE=de ./gcompris-qt.sh --fullscreen
+Icon=icon.png
+Runtime=linux
